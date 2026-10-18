@@ -3,39 +3,45 @@
 #include <unistd.h>
 using namespace std;
 
-int data = 0;
-pthread_mutex_t lock1 = PTHREAD_MUTEX_INITIALIZER;
+string data = "Hello";
+pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
+bool syncOn;
 
 void* reader(void*) {
-    pthread_mutex_lock(&lock1);
+    if (syncOn) pthread_mutex_lock(&m);
     cout << "Reader reads: " << data << endl;
-    pthread_mutex_unlock(&lock1);
+    if (syncOn) pthread_mutex_unlock(&m);
     return NULL;
 }
 
 void* writer(void*) {
-    pthread_mutex_lock(&lock1);
-    data++;
+    if (syncOn) pthread_mutex_lock(&m);
+    data = "Data updated by writer";
     cout << "Writer writes: " << data << endl;
-    pthread_mutex_unlock(&lock1);
+    if (syncOn) pthread_mutex_unlock(&m);
     return NULL;
 }
 
-int main() {
+void run(bool s) {
+    syncOn = s;
     pthread_t r, w;
-
-    cout << "With Synchronization:\n";
     pthread_create(&r, NULL, reader, NULL);
     pthread_create(&w, NULL, writer, NULL);
     pthread_join(r, NULL);
     pthread_join(w, NULL);
+}
 
+int main() {
+    cout << "Enter a sentence: ";
+    getline(cin, data);
+
+    cout << "\nWith Synchronization:\n";
+    run(true);
+
+    data = "Original sentence";
     cout << "\nWithout Synchronization:\n";
-    data = 0;
-    cout << "Reader reads: " << data << endl;
-    data++;
-    cout << "Writer writes: " << data << endl;
+    run(false);
 
-    pthread_mutex_destroy(&lock1);
+    pthread_mutex_destroy(&m);
     return 0;
 }
