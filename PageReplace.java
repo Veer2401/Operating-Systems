@@ -1,4 +1,3 @@
-
 import java.util.Scanner;
 
 public class PageReplace {
@@ -56,23 +55,24 @@ public class PageReplace {
                     pos = j;
 
             if (pos == -1) {
-                int least = 0;
+                int min = 0;
 
                 for (int j = 0; j < f; j++) {
                     if (frame[j] == -1) {
-                        least = j;
+                        min = j;
                         break;
                     }
-                    if (time[j] < time[least])
-                        least = j;
+                    if (time[j] < time[min])
+                        min = j;
                 }
 
-                frame[least] = pages[i];
-                time[least] = i;
+                frame[min] = pages[i];
                 faults++;
-            } else {
-                time[pos] = i;
             }
+
+            for (int j = 0; j < f; j++)
+                if (frame[j] == pages[i])
+                    time[j] = i;
         }
         System.out.println("LRU Page Faults: " + faults);
 
@@ -90,27 +90,27 @@ public class PageReplace {
                     found = true;
 
             if (!found) {
-                int replace = -1;
-                int farthest = -1;
+                int max = -1, pos = 0;
 
                 for (int j = 0; j < f; j++) {
-                    if (frame[j] == -1) {
-                        replace = j;
-                        break;
-                    }
-
                     int k;
+
                     for (k = i + 1; k < n; k++)
                         if (pages[k] == frame[j])
                             break;
 
-                    if (k > farthest) {
-                        farthest = k;
-                        replace = j;
+                    if (frame[j] == -1) {
+                        pos = j;
+                        break;
+                    }
+
+                    if (k > max) {
+                        max = k;
+                        pos = j;
                     }
                 }
 
-                frame[replace] = pages[i];
+                frame[pos] = pages[i];
                 faults++;
             }
         }
