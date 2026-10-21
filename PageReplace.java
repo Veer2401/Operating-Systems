@@ -41,80 +41,73 @@ public class PageReplace {
         System.out.println("FCFS Page Faults: " + faults);
 
         // LRU
-        for (int i = 0; i < f; i++)
-            frame[i] = -1;
+Arrays.fill(frame, -1);
+int[] time = new int[f];
+faults = 0;
 
-        int[] time = new int[f];
-        faults = 0;
+for (int i = 0; i < n; i++) {
+    int pos = -1;
 
-        for (int i = 0; i < n; i++) {
-            int pos = -1;
+    for (int j = 0; j < f; j++)
+        if (frame[j] == pages[i])
+            pos = j;
 
-            for (int j = 0; j < f; j++)
-                if (frame[j] == pages[i])
-                    pos = j;
+    if (pos == -1) {
+        pos = 0;
 
-            if (pos == -1) {
-                int min = 0;
+        for (int j = 0; j < f; j++)
+            if (frame[j] == -1 || time[j] < time[pos])
+                pos = j;
 
-                for (int j = 0; j < f; j++) {
-                    if (frame[j] == -1) {
-                        min = j;
-                        break;
-                    }
-                    if (time[j] < time[min])
-                        min = j;
-                }
+        frame[pos] = pages[i];
+        faults++;
+    }
 
-                frame[min] = pages[i];
-                faults++;
+    for (int j = 0; j < f; j++)
+        if (frame[j] == pages[i])
+            time[j] = i;
+}
+
+System.out.println("LRU Page Faults: " + faults);
+       
+
+       // Optimal
+Arrays.fill(frame, -1);
+faults = 0;
+
+for (int i = 0; i < n; i++) {
+    boolean found = false;
+
+    for (int j = 0; j < f; j++)
+        if (frame[j] == pages[i])
+            found = true;
+
+    if (!found) {
+        int pos = 0, max = -1;
+
+        for (int j = 0; j < f; j++) {
+            int k = i + 1;
+
+            while (k < n && pages[k] != frame[j])
+                k++;
+
+            if (frame[j] == -1) {
+                pos = j;
+                break;
             }
 
-            for (int j = 0; j < f; j++)
-                if (frame[j] == pages[i])
-                    time[j] = i;
-        }
-        System.out.println("LRU Page Faults: " + faults);
-
-        // Optimal
-        for (int i = 0; i < f; i++)
-            frame[i] = -1;
-
-        faults = 0;
-
-        for (int i = 0; i < n; i++) {
-            boolean found = false;
-
-            for (int j = 0; j < f; j++)
-                if (frame[j] == pages[i])
-                    found = true;
-
-            if (!found) {
-                int max = -1, pos = 0;
-
-                for (int j = 0; j < f; j++) {
-                    int k;
-
-                    for (k = i + 1; k < n; k++)
-                        if (pages[k] == frame[j])
-                            break;
-
-                    if (frame[j] == -1) {
-                        pos = j;
-                        break;
-                    }
-
-                    if (k > max) {
-                        max = k;
-                        pos = j;
-                    }
-                }
-
-                frame[pos] = pages[i];
-                faults++;
+            if (k > max) {
+                max = k;
+                pos = j;
             }
         }
-        System.out.println("Optimal Page Faults: " + faults);
+
+        frame[pos] = pages[i];
+        faults++;
+    }
+}
+
+System.out.println("Optimal Page Faults: " + faults);
 
         sc.close();
     }
